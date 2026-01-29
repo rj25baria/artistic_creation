@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root{--nav-bg:#0b1320;--accent:#ff9800}
+    body{font-family:Inter,Segoe UI,system-ui; background:#f4f6f9; margin:0}
+    .navbar{background:var(--nav-bg)!important}
+    .navbar .nav-link{color:#fff!important}
+    .navbar .nav-link i{font-size:20px;color:#fff;transition:color .2s}
+    .navbar .nav-link:hover i,.navbar .nav-link.show i{color:var(--accent)}
+    .page-title{margin:28px 0}
+    .card{border:none;border-radius:12px;box-shadow:0 6px 18px rgba(11,19,32,.06)}
+    .stat {font-weight:700; font-size:1.35rem}
+    .small-muted{color:#6c757d}
+    .table-actions .btn{margin-right:6px}
+    .dropdown-header{font-size:.85rem; font-weight:600}
+    .badge-pending{background:#fff3cd;color:#856404;border:1px solid  #FEA116}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand text-white" href="index.html">Artistic Creation</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="products.html">Products</a></li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-fill"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+            <!-- Admin -->
+            <li><h6 class="dropdown-header">Admin</h6></li>
+            <li><a class="dropdown-item" href="admin-dashboard.html">Dashboard</a></li>
+            <li><a class="dropdown-item" href="manage-users.html">Manage Users</a></li>
+            <li><a class="dropdown-item" href="admin-settings.html">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <!-- Buyer -->
+            <li><h6 class="dropdown-header">Buyer</h6></li>
+            <li><a class="dropdown-item" href="buyer-orders.html">My Orders</a></li>
+            <li><a class="dropdown-item" href="buyer-wishlist.html">Wishlist</a></li>
+            <li><a class="dropdown-item" href="buyer-settings.html">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <!-- Seller -->
+            <li><h6 class="dropdown-header">Seller</h6></li>
+            <li><a class="dropdown-item" href="seller-dashboard.html">Dashboard</a></li>
+            <li><a class="dropdown-item" href="seller-products.html">My Products</a></li>
+            <li><a class="dropdown-item" href="seller-orders.html">Orders</a></li>
+            <li><a class="dropdown-item" href="seller-settings.html">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="logout.html">Logout</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="container">
+  <div class="page-title d-flex justify-content-between align-items-center">
+    <div>
+      <h2 class="mb-0">Admin Dashboard</h2>
+      <small class="small-muted">Overview & quick actions</small>
+    </div>
+    <div>
+      <button class="btn btn-outline-secondary me-2" id="refreshBtn"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+      <a class="btn btn-warning text-white" href="manage-users.html"><i class="bi bi-people-fill"></i> Manage Users</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-4">
+    <div class="col-md-3">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="small-muted">Total Users</div>
+            <div class="stat" id="statUsers">1,280</div>
+          </div>
+          <div class="text-end">
+            <i class="bi bi-people-fill fs-2 text-warning"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="small-muted">Active Sellers</div>
+            <div class="stat" id="statSellers">182</div>
+          </div>
+          <div class="text-end">
+            <i class="bi bi-shop-window fs-2 text-success"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="small-muted">Monthly Orders</div>
+            <div class="stat" id="statOrders">3,420</div>
+          </div>
+          <div class="text-end">
+            <i class="bi bi-basket3 fs-2 text-primary"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="small-muted">Revenue</div>
+            <div class="stat" id="statRevenue">₹1.2M</div>
+          </div>
+          <div class="text-end">
+            <i class="bi bi-currency-dollar fs-2 text-danger"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart + Quick Table -->
+  <div class="row mt-4 g-4">
+    <div class="col-lg-8">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Sales This Year</h5>
+          <small class="small-muted">Monthly breakdown</small>
+        </div>
+        <canvas id="salesChart" height="140"></canvas>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card p-3">
+        <h6 class="mb-3">Recent Signups</h6>
+        <ul class="list-unstyled mb-0" id="recentUsers">
+          <!-- JS will populate -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Orders Table -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Recent Orders</h5>
+          <small class="small-muted">Latest 8 orders</small>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Buyer</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Placed</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="recentOrdersTable">
+              <!-- JS fills -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Sample data
+  const monthlySales = [12000, 18000, 15000, 23000, 26000, 21000, 30000, 28000, 25000, 32000, 34000, 38000];
+  const recentUsers = [
+    {name:'Priya K', role:'Buyer'},
+    {name:'Arjun M', role:'Seller'},
+    {name:'Sana R', role:'Buyer'},
+    {name:'Dev P', role:'Seller'}
+  ];
+  const recentOrders = [
+    {id:'ORD-1001', buyer:'Priya K', amount:'₹2,500', status:'Delivered', placed:'2d ago'},
+    {id:'ORD-1002', buyer:'Rakesh T', amount:'₹1,200', status:'Processing', placed:'3d ago'},
+    {id:'ORD-1003', buyer:'Anita S', amount:'₹3,900', status:'Shipped', placed:'4d ago'},
+    {id:'ORD-1004', buyer:'Vikram N', amount:'₹850', status:'Cancelled', placed:'5d ago'}
+  ];
+
+  // Populate recent users
+  const ruEl = document.getElementById('recentUsers');
+  recentUsers.forEach(u=>{
+    const li = document.createElement('li');
+    li.className = 'd-flex align-items-center mb-2';
+    li.innerHTML = `<div class="me-3"><i class="bi bi-person-circle fs-3 text-secondary"></i></div>
+                    <div><strong>${u.name}</strong><div class="small-muted">${u.role}</div></div>`;
+    ruEl.appendChild(li);
+  });
+
+  // Populate orders table
+  const ordT = document.getElementById('recentOrdersTable');
+  recentOrders.forEach(o=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${o.id}</td>
+                    <td>${o.buyer}</td>
+                    <td>${o.amount}</td>
+                    <td>${renderStatus(o.status)}</td>
+                    <td>${o.placed}</td>
+                    <td class="text-end"><button class="btn btn-sm btn-outline-primary">View</button></td>`;
+    ordT.appendChild(tr);
+  });
+
+  function renderStatus(s){
+    const map = {
+      'Delivered':'<span class="badge bg-success">Delivered</span>',
+      'Processing':'<span class="badge bg-primary">Processing</span>',
+      'Shipped':'<span class="badge bg-info text-dark">Shipped</span>',
+      'Cancelled':'<span class="badge bg-danger">Cancelled</span>'
+    };
+    return map[s] || `<span class="badge bg-secondary">${s}</span>`;
+  }
+
+  // Chart
+  const ctx = document.getElementById('salesChart').getContext('2d');
+  const salesChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets: [{label:'Sales', data: monthlySales, tension:0.35, borderWidth:2, fill:true, backgroundColor:'rgba(255,152,0,0.12)', borderColor:'#ff9800', pointRadius:3}]
+    },
+    options: {responsive:true, plugins:{legend:{display:false}}}
+  });
+
+  // Refresh button demo
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    alert('Data refreshed (demo).');
+  });
+</script>
+</body>
+</html>
