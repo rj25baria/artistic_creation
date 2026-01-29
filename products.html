@@ -231,92 +231,189 @@ body {
 </div>
 
 <script>
-  // Fetch products from backend
-  fetch('backend/get_products.php')
-    .then(response => response.json())
-    .then(products => {
-        const productsRow = document.getElementById('productsRow');
-        productsRow.innerHTML = ''; // Clear loading/static content
-        
-        if (products.length === 0) {
-            productsRow.innerHTML = '<p class="text-center">No products found.</p>';
-            return;
-        }
+  // Static Products Data (Fallback/Original)
+  const products = [
+      {
+          id: 1,
+          name: 'Vignaharta Wall Art',
+          price: 189,
+          old_price: 250,
+          category: 'spritual',
+          image_url: 'img/product_1 (2).png',
+          rating: 4.4
+      },
+      {
+          id: 2,
+          name: 'Wall Hand-Decoreted Mirror',
+          price: 399,
+          old_price: 500,
+          category: 'wall-decor',
+          image_url: 'img/product_2.jpeg',
+          rating: 4.5
+      },
+      {
+          id: 3,
+          name: 'Buddha Meditation Canvas',
+          price: 499,
+          old_price: 650,
+          category: 'spritual',
+          image_url: 'img/product_3.png',
+          rating: 4.2
+      },
+      {
+          id: 4,
+          name: 'Elegant Key Holder',
+          price: 264,
+          old_price: 299,
+          category: 'key-holders',
+          image_url: 'img/product_4.png',
+          rating: 4.9
+      },
+      {
+          id: 5,
+          name: 'Spritual Abstract Art',
+          price: 156,
+          old_price: 199,
+          category: 'spritual',
+          image_url: 'img/product_5.png',
+          rating: 4.5
+      },
+      {
+          id: 6,
+          name: 'Lord Shiva Meditation Canvas',
+          price: 199,
+          old_price: 299,
+          category: 'spritual',
+          image_url: 'img/product_6.png',
+          rating: 4.3
+      },
+      {
+          id: 7,
+          name: 'Royal Trunk Lights',
+          price: 299,
+          old_price: 450,
+          category: 'decor',
+          image_url: 'img/product_7.png',
+          rating: 4.3
+      },
+      {
+          id: 8,
+          name: 'Mandala Bloom Wall Art',
+          price: 650,
+          old_price: 1100,
+          category: 'wall-decor',
+          image_url: 'img/product_13.png',
+          rating: 4.6
+      },
+      {
+          id: 9,
+          name: 'Color Bloom Box Set',
+          price: 350,
+          old_price: 650,
+          category: 'table-decor',
+          image_url: 'img/product_9 (2).png',
+          rating: 4.2
+      },
+      {
+          id: 10,
+          name: 'Textured Basket',
+          price: 400,
+          old_price: 500,
+          category: 'decor',
+          image_url: 'img/product_10.png',
+          rating: 5.2
+      },
+      {
+          id: 11,
+          name: 'Luminous Tree of Life Wall Art',
+          price: 800,
+          old_price: 1400,
+          category: 'wall-decor',
+          image_url: 'img/product_11.png',
+          rating: 5.3
+      },
+      {
+          id: 12,
+          name: 'FolkArt Key Keeper',
+          price: 999,
+          old_price: 1400,
+          category: 'key-holders',
+          image_url: 'img/product_12.png',
+          rating: 4.3
+      }
+  ];
 
-        products.forEach(product => {
-            const productHtml = `
-            <div class="col-lg-3 col-md-4 col-sm-6" data-category="${product.category || 'all'}">
-              <div class="product-card">
-                <a href="product-detail.html?id=${product.id}">
-                  <div class="product-img-wrapper">
-                    <img src="${product.image_url || 'img/product_1.jpg'}" alt="${product.name}" class="product-img">
-                  </div>
-                </a>
-                <div class="product-info">
-                  <h6><a href="product-detail.html?id=${product.id}" class="text-dark text-decoration-none">${product.name}</a></h6>
-                  <p class="price">₹${product.price} <span class="old-price">₹${product.old_price || ''}</span></p>
-                  <span class="badge bg-light text-dark">Free Delivery</span>
-                  <div class="rating-wrap mt-2">
-                    <span class="rating">${product.rating || '0'}★</span>
-                    <span class="reviews">0 Reviews</span>
-                  </div>
+  // Render Products
+  function renderProducts(productsToRender) {
+      const productsRow = document.getElementById('productsRow');
+      productsRow.innerHTML = '';
+      
+      if (productsToRender.length === 0) {
+          productsRow.innerHTML = '<p class="text-center">No products found.</p>';
+          return;
+      }
+
+      productsToRender.forEach(product => {
+          // Handle inconsistent file naming for product 5
+          let link = `product${product.id}.html`;
+          if (product.id === 5) link = 'products5.html';
+
+          const productHtml = `
+          <div class="col-lg-3 col-md-4 col-sm-6" data-category="${product.category || 'all'}">
+            <div class="product-card">
+              <a href="${link}">
+                <div class="product-img-wrapper">
+                  <img src="${product.image_url}" alt="${product.name}" class="product-img">
+                </div>
+              </a>
+              <div class="product-info">
+                <h6><a href="${link}" class="text-dark text-decoration-none">${product.name}</a></h6>
+                <p class="price">₹${product.price} <span class="old-price">₹${product.old_price}</span></p>
+                <span class="badge bg-light text-dark">Free Delivery</span>
+                <div class="rating-wrap mt-2">
+                  <span class="rating">${product.rating}★</span>
+                  <span class="reviews">0 Reviews</span>
                 </div>
               </div>
-            </div>`;
-            productsRow.innerHTML += productHtml;
-        });
-    })
-    .catch(error => {
-        console.error('Error fetching products:', error);
-        // Fallback to static content if backend fails (optional, here just showing error)
-       // document.getElementById('productsRow').innerHTML = '<p class="text-center text-danger">Error loading products. Please ensure backend is running.</p>';
-    });
+            </div>
+          </div>`;
+          productsRow.innerHTML += productHtml;
+      });
+  }
+
+  // Initial Render
+  renderProducts(products);
 
   // CATEGORY FILTER
   document.getElementById('categoryFilter').addEventListener('change', function() {
     const selected = this.value;
-    document.querySelectorAll('#productsRow > div').forEach(col => {
-      const category = col.getAttribute('data-category');
-      if (selected === 'all' || category === selected) {
-        col.style.display = 'block';
-      } else {
-        col.style.display = 'none';
-      }
-    });
+    const filtered = selected === 'all' 
+        ? products 
+        : products.filter(p => p.category === selected);
+    renderProducts(filtered);
   });
 
-  // SORT FILTER (Simple client-side sort)
+  // SORT FILTER
   document.getElementById('sortFilter').addEventListener('change', function() {
-      const row = document.getElementById('productsRow');
-      const cols = Array.from(row.children);
       const value = this.value;
+      let sorted = [...products]; // Copy array
       
-      cols.sort((a, b) => {
-          const priceA = parseFloat(a.querySelector('.price').innerText.replace('₹', ''));
-          const priceB = parseFloat(b.querySelector('.price').innerText.replace('₹', ''));
-          
-          if (value === 'price-low') return priceA - priceB;
-          if (value === 'price-high') return priceB - priceA;
-          return 0; // Default
-      });
+      if (value === 'price-low') {
+          sorted.sort((a, b) => a.price - b.price);
+      } else if (value === 'price-high') {
+          sorted.sort((a, b) => b.price - a.price);
+      }
       
-      cols.forEach(col => row.appendChild(col));
+      renderProducts(sorted);
+  });
+
   // SEARCH FILTER
   document.getElementById('searchBox').addEventListener('input', function() {
-    const query = this.value.toLowerCase();
-    document.querySelectorAll('#productsRow > div').forEach(col => {
-      const text = col.innerText.toLowerCase();
-      // Ensure we respect the current category filter if needed, but simple search is usually global or within view
-      col.style.display = text.includes(query) ? 'block' : 'none';
-    });
+      const term = this.value.toLowerCase();
+      const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+      renderProducts(filtered);
   });
+
 </script>
-
-    <!-- Footer -->
-    <div class="container-fluid bg-dark text-light text-center p-3">
-      <p class="mb-0">&copy; 2025 Artistic Creation. All Rights Reserved.</p>
-    </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

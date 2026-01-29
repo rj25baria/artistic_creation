@@ -200,11 +200,11 @@
 <script>
   // Fetch Stats
   function fetchStats() {
-      fetch('backend/get_stats.php')
+      fetch('http://localhost:3000/api/stats')
           .then(res => res.json())
           .then(data => {
               document.getElementById('statUsers').innerText = data.users;
-              document.getElementById('statSellers').innerText = data.sellers;
+              document.getElementById('statSellers').innerText = data.sellers || 0; // Fallback if not implemented in stats.js yet
               document.getElementById('statOrders').innerText = data.orders;
               document.getElementById('statRevenue').innerText = '₹' + parseFloat(data.revenue).toLocaleString();
           })
@@ -213,7 +213,7 @@
 
   // Fetch Recent Orders
   function fetchRecentOrders() {
-      fetch('backend/get_orders.php?role=admin')
+      fetch('http://localhost:3000/api/orders?role=admin')
           .then(res => res.json())
           .then(data => {
               const tbody = document.getElementById('recentOrdersTable');

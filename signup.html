@@ -363,7 +363,7 @@
   function login() {
     const u=document.getElementById('loginUsername').value,p=document.getElementById('loginPassword').value;
     
-    fetch('backend/login.php', {
+    fetch('http://localhost:3000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })

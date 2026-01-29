@@ -238,7 +238,7 @@
         const totalText = totalEl.textContent.replace('₹', '');
         const totalAmount = parseFloat(totalText);
 
-        fetch('backend/place_order.php', {
+        fetch('http://localhost:3000/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

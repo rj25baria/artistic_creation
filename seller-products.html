@@ -83,9 +83,9 @@
   }
 
   function fetchProducts() {
-      fetch('backend/get_products.php')
-          .then(res => res.json())
-          .then(data => {
+       fetch('http://localhost:3000/api/products')
+           .then(res => res.json())
+           .then(data => {
               tbody.innerHTML = '';
               const myProducts = data.filter(p => p.seller_id == user.id);
               
@@ -138,13 +138,13 @@
     formData.append('description', desc);
     
     if (imageInput.files.length > 0) {
-        formData.append('image', imageInput.files[0]);
-    }
-
-    fetch('backend/add_product.php', {
-        method: 'POST',
-        body: formData
-    })
+         formData.append('image', imageInput.files[0]);
+     }
+ 
+     fetch('http://localhost:3000/api/products', {
+         method: 'POST',
+         body: formData
+     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
