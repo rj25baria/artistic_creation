@@ -198,68 +198,66 @@
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Sample data
-  const monthlySales = [12000, 18000, 15000, 23000, 26000, 21000, 30000, 28000, 25000, 32000, 34000, 38000];
-  const recentUsers = [
-    {name:'Priya K', role:'Buyer'},
-    {name:'Arjun M', role:'Seller'},
-    {name:'Sana R', role:'Buyer'},
-    {name:'Dev P', role:'Seller'}
-  ];
-  const recentOrders = [
-    {id:'ORD-1001', buyer:'Priya K', amount:'₹2,500', status:'Delivered', placed:'2d ago'},
-    {id:'ORD-1002', buyer:'Rakesh T', amount:'₹1,200', status:'Processing', placed:'3d ago'},
-    {id:'ORD-1003', buyer:'Anita S', amount:'₹3,900', status:'Shipped', placed:'4d ago'},
-    {id:'ORD-1004', buyer:'Vikram N', amount:'₹850', status:'Cancelled', placed:'5d ago'}
-  ];
-
-  // Populate recent users
-  const ruEl = document.getElementById('recentUsers');
-  recentUsers.forEach(u=>{
-    const li = document.createElement('li');
-    li.className = 'd-flex align-items-center mb-2';
-    li.innerHTML = `<div class="me-3"><i class="bi bi-person-circle fs-3 text-secondary"></i></div>
-                    <div><strong>${u.name}</strong><div class="small-muted">${u.role}</div></div>`;
-    ruEl.appendChild(li);
-  });
-
-  // Populate orders table
-  const ordT = document.getElementById('recentOrdersTable');
-  recentOrders.forEach(o=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${o.id}</td>
-                    <td>${o.buyer}</td>
-                    <td>${o.amount}</td>
-                    <td>${renderStatus(o.status)}</td>
-                    <td>${o.placed}</td>
-                    <td class="text-end"><button class="btn btn-sm btn-outline-primary">View</button></td>`;
-    ordT.appendChild(tr);
-  });
-
-  function renderStatus(s){
-    const map = {
-      'Delivered':'<span class="badge bg-success">Delivered</span>',
-      'Processing':'<span class="badge bg-primary">Processing</span>',
-      'Shipped':'<span class="badge bg-info text-dark">Shipped</span>',
-      'Cancelled':'<span class="badge bg-danger">Cancelled</span>'
-    };
-    return map[s] || `<span class="badge bg-secondary">${s}</span>`;
+  // Fetch Stats
+  function fetchStats() {
+      fetch('backend/get_stats.php')
+          .then(res => res.json())
+          .then(data => {
+              document.getElementById('statUsers').innerText = data.users;
+              document.getElementById('statSellers').innerText = data.sellers;
+              document.getElementById('statOrders').innerText = data.orders;
+              document.getElementById('statRevenue').innerText = '₹' + parseFloat(data.revenue).toLocaleString();
+          })
+          .catch(err => console.error(err));
   }
 
-  // Chart
-  const ctx = document.getElementById('salesChart').getContext('2d');
-  const salesChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      datasets: [{label:'Sales', data: monthlySales, tension:0.35, borderWidth:2, fill:true, backgroundColor:'rgba(255,152,0,0.12)', borderColor:'#ff9800', pointRadius:3}]
-    },
-    options: {responsive:true, plugins:{legend:{display:false}}}
-  });
+  // Fetch Recent Orders
+  function fetchRecentOrders() {
+      fetch('backend/get_orders.php?role=admin')
+          .then(res => res.json())
+          .then(data => {
+              const tbody = document.getElementById('recentOrdersTable');
+              tbody.innerHTML = '';
+              data.slice(0, 8).forEach(order => {
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = `
+                      <td>#${order.id}</td>
+                      <td>${order.buyer_name || 'Unknown'}</td>
+                      <td>₹${order.total_amount}</td>
+                      <td><span class="badge bg-${getStatusColor(order.status)}">${order.status}</span></td>
+                      <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                      <td><button class="btn btn-sm btn-light">View</button></td>
+                  `;
+                  tbody.appendChild(tr);
+              });
+          });
+  }
 
-  // Refresh button demo
-  document.getElementById('refreshBtn').addEventListener('click', () => {
-    alert('Data refreshed (demo).');
+  function getStatusColor(status) {
+      if(status === 'pending') return 'warning';
+      if(status === 'shipped') return 'info';
+      if(status === 'delivered') return 'success';
+      return 'secondary';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+      fetchStats();
+      fetchRecentOrders();
+      
+      // Dummy Chart
+      new Chart(document.getElementById('salesChart'), {
+          type: 'line',
+          data: {
+              labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+              datasets: [{
+                  label: 'Sales',
+                  data: [12, 19, 3, 5, 2, 3],
+                  borderColor: '#ff9800',
+                  tension: 0.4
+              }]
+          },
+          options: { responsive: true }
+      });
   });
 </script>
 </body>

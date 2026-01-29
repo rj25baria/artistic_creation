@@ -159,20 +159,31 @@
       <div>Taxes (5%): <span id="tax">0</span></div>
       <div>Shipping: <span id="shipping">5.00</span></div>
       <div><strong>Total: <span id="total">0</span></strong></div>
-      <button>Checkout</button>
+      <button id="checkoutBtn">Checkout</button>
     </div>
   </div>
 
   <script>
-    const cartItems = document.querySelectorAll('.cart-item');
     const subtotalEl = document.getElementById('subtotal');
     const taxEl = document.getElementById('tax');
     const shippingEl = document.getElementById('shipping');
     const totalEl = document.getElementById('total');
 
+    // Helper to get items
+    function getCartItems() {
+        return Array.from(document.querySelectorAll('.cart-item')).map(item => {
+            return {
+                id: Math.floor(Math.random() * 100) + 1, // Dummy ID as these are hardcoded
+                name: item.querySelector('h3').innerText,
+                quantity: parseInt(item.querySelector('.qty').textContent),
+                price: parseFloat(item.dataset.price)
+            };
+        });
+    }
+
     const updateSummary = () => {
       let subtotal = 0;
-      cartItems.forEach(item => {
+      document.querySelectorAll('.cart-item').forEach(item => {
         const qty = parseInt(item.querySelector('.qty').textContent);
         const pricePerUnit = parseFloat(item.dataset.price);
         const totalPrice = qty * pricePerUnit;
@@ -187,50 +198,68 @@
       totalEl.textContent = `₹${(subtotal + tax + shipping).toFixed(2)}`;
     };
 
-    cartItems.forEach(item => {
-      const minusBtn = item.querySelector('.minus');
-      const plusBtn = item.querySelector('.plus');
-      const qtyEl = item.querySelector('.qty');
-
-      minusBtn.addEventListener('click', () => {
-        let qty = parseInt(qtyEl.textContent);
-        if (qty > 1) qtyEl.textContent = qty - 1;
-        updateSummary();
-      });
-
-      plusBtn.addEventListener('click', () => {
-        let qty = parseInt(qtyEl.textContent);
-        qtyEl.textContent = qty + 1;
-        updateSummary();
-      });
+    // Event Delegation for dynamic items (if we were adding them dynamically)
+    document.querySelector('.cart').addEventListener('click', e => {
+        if(e.target.classList.contains('minus')) {
+            const qtyEl = e.target.nextElementSibling;
+            let qty = parseInt(qtyEl.textContent);
+            if (qty > 1) qtyEl.textContent = qty - 1;
+            updateSummary();
+        }
+        if(e.target.classList.contains('plus')) {
+            const qtyEl = e.target.previousElementSibling;
+            let qty = parseInt(qtyEl.textContent);
+            qtyEl.textContent = qty + 1;
+            updateSummary();
+        }
+        if(e.target.classList.contains('remove')) {
+            e.target.closest('.cart-item').remove();
+            updateSummary();
+        }
     });
 
-    // Initial summary calculation
     updateSummary();
-    cartItems.forEach(item => {
-  const minusBtn = item.querySelector('.minus');
-  const plusBtn = item.querySelector('.plus');
-  const qtyEl = item.querySelector('.qty');
-  const removeBtn = item.querySelector('.remove');
 
-  minusBtn.addEventListener('click', () => {
-    let qty = parseInt(qtyEl.textContent);
-    if (qty > 1) qtyEl.textContent = qty - 1;
-    updateSummary();
-  });
+    // Checkout Logic
+    document.getElementById('checkoutBtn').addEventListener('click', () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            alert('Please login to place an order');
+            window.location.href = 'signup.html';
+            return;
+        }
 
-  plusBtn.addEventListener('click', () => {
-    let qty = parseInt(qtyEl.textContent);
-    qtyEl.textContent = qty + 1;
-    updateSummary();
-  });
+        const items = getCartItems();
+        if (items.length === 0) {
+            alert('Your cart is empty');
+            return;
+        }
 
-  removeBtn.addEventListener('click', () => {
-    item.remove(); // remove the cart item from DOM
-    updateSummary(); // recalculate totals
-  });
-});
+        const totalText = totalEl.textContent.replace('₹', '');
+        const totalAmount = parseFloat(totalText);
 
+        fetch('backend/place_order.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: user.id,
+                items: items,
+                total_amount: totalAmount
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                alert('Order placed successfully! Order ID: ' + data.order_id);
+                // Clear cart (visually)
+                document.querySelectorAll('.cart-item').forEach(i => i.remove());
+                updateSummary();
+            } else {
+                alert('Order failed: ' + data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    });
   </script>
 </body>
 </html>

@@ -342,15 +342,47 @@
           p=document.getElementById('signupPassword').value,c=document.getElementById('signupConfirm').value;
     if(!u||!e||!p||!c) return showMessage("Please fill in all fields",true);
     if(p!==c) return showMessage("Passwords do not match",true);
-    localStorage.setItem('user',JSON.stringify({username:u,email:e,password:p}));
-    showMessage("Signup successful!"); toggle();
+
+    fetch('backend/register.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, email: e, password: p })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            showMessage("Signup successful! Please login.");
+            toggle();
+        } else {
+            showMessage(data.message, true);
+        }
+    })
+    .catch(err => showMessage("Error connecting to server", true));
   }
 
   function login() {
     const u=document.getElementById('loginUsername').value,p=document.getElementById('loginPassword').value;
-    const user=JSON.parse(localStorage.getItem('user'));
-    if(user&&u===user.username&&p===user.password) showMessage(`Welcome back, ${u}!`);
-    else showMessage("Invalid credentials",true);
+    
+    fetch('backend/login.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+            showMessage(`Welcome back, ${data.user.username}!`);
+            setTimeout(() => {
+                if(data.user.role === 'admin') window.location.href = 'admin-dashboard.html';
+                else if(data.user.role === 'seller') window.location.href = 'seller-dashboard.html';
+                else window.location.href = 'index.html';
+            }, 1000);
+        } else {
+            showMessage(data.message, true);
+        }
+    })
+    .catch(err => showMessage("Error connecting to server", true));
   }
 
   function openForgotModal(){document.getElementById('forgotModal').style.display='flex';}
