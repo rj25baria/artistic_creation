@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { readProducts, writeProducts, readUsers } = require('../db_local');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -24,13 +24,22 @@ const upload = multer({ storage: storage });
 // Get all products
 router.get('/', async (req, res) => {
     try {
-        const [products] = await db.execute(`
-            SELECT p.*, u.username as seller_name 
-            FROM products p 
-            LEFT JOIN users u ON p.seller_id = u.id 
-            ORDER BY p.created_at DESC
-        `);
-        res.json(products);
+        const products = readProducts();
+        const users = readUsers();
+        
+        // Join with seller info
+        const productsWithSeller = products.map(p => {
+            const seller = users.find(u => u.id == p.seller_id);
+            return {
+                ...p,
+                seller_name: seller ? seller.username : 'Unknown'
+            };
+        });
+        
+        // Sort by created_at DESC
+        productsWithSeller.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
+        res.json(productsWithSeller);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -48,10 +57,22 @@ router.post('/', upload.single('image'), async (req, res) => {
     }
 
     try {
-        await db.execute(
-            'INSERT INTO products (seller_id, name, description, price, image_url, category) VALUES (?, ?, ?, ?, ?, ?)',
-            [seller_id, name, description, price, image_url, category]
-        );
+        const products = readProducts();
+        
+        const newProduct = {
+            id: products.length + 1,
+            seller_id: parseInt(seller_id),
+            name,
+            description,
+            price: parseFloat(price),
+            image_url,
+            category,
+            created_at: new Date()
+        };
+        
+        products.push(newProduct);
+        writeProducts(products);
+        
         res.json({ success: true, message: 'Product added successfully' });
     } catch (err) {
         console.error(err);

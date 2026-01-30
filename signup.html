@@ -343,7 +343,7 @@
     if(!u||!e||!p||!c) return showMessage("Please fill in all fields",true);
     if(p!==c) return showMessage("Passwords do not match",true);
 
-    fetch('backend/register.php', {
+    fetch('http://localhost:3000/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, email: e, password: p })

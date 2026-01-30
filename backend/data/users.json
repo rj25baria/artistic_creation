@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "username": "RANJAN",
+    "email": "ranjan.baria302@gmail.com",
+    "password": "$2b$10$Cbpwp8lKfJyUN/g18fW.1.X2yaQEeCTio1mopSsKGhVl.oGktda5C",
+    "role": "buyer",
+    "created_at": "2026-01-30T14:55:52.833Z"
+  }
+]

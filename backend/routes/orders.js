@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { readOrders, writeOrders } = require('../db_local');
 
 // Place Order
 router.post('/', async (req, res) => {
@@ -10,50 +10,42 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ success: false, message: 'Invalid order data' });
     }
 
-    const connection = await db.getConnection();
     try {
-        await connection.beginTransaction();
+        const orders = readOrders();
+        
+        const newOrder = {
+            id: orders.length + 1,
+            user_id,
+            total_amount,
+            status: 'pending',
+            created_at: new Date(),
+            items: items // Embedding items directly
+        };
+        
+        orders.push(newOrder);
+        writeOrders(orders);
 
-        // Create Order
-        const [orderResult] = await connection.execute(
-            'INSERT INTO orders (user_id, total_amount) VALUES (?, ?)',
-            [user_id, total_amount]
-        );
-        const orderId = orderResult.insertId;
-
-        // Create Order Items
-        for (const item of items) {
-            await connection.execute(
-                'INSERT INTO order_items (order_id, product_name, quantity, price) VALUES (?, ?, ?, ?)',
-                [orderId, item.name, item.quantity, item.price]
-            );
-        }
-
-        await connection.commit();
-        res.json({ success: true, message: 'Order placed successfully', order_id: orderId });
+        res.json({ success: true, message: 'Order placed successfully', order_id: newOrder.id });
     } catch (err) {
-        await connection.rollback();
         console.error(err);
         res.status(500).json({ success: false, message: 'Error placing order' });
-    } finally {
-        connection.release();
     }
 });
 
-// Get Orders (for specific user or all for admin - simplified here)
+// Get Orders
 router.get('/', async (req, res) => {
     const userId = req.query.user_id;
     
     try {
-        let query = 'SELECT * FROM orders ORDER BY created_at DESC';
-        let params = [];
+        let orders = readOrders();
         
         if (userId) {
-            query = 'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC';
-            params = [userId];
+            orders = orders.filter(o => o.user_id == userId);
         }
         
-        const [orders] = await db.execute(query, params);
+        // Sort by created_at DESC
+        orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        
         res.json(orders);
     } catch (err) {
         console.error(err);

@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Shopping Cart</title>
-
- <!-- Google Web Fonts -->
+  
+  <!-- Google Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&family=Pacifico&display=swap" rel="stylesheet">
@@ -13,10 +13,7 @@
   <!-- Icon Font Stylesheet -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-  <!-- Font Awesome for Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Libraries Stylesheet -->
   <link href="lib/animate/animate.min.css" rel="stylesheet">
@@ -25,8 +22,6 @@
 
   <!-- Bootstrap Stylesheet -->
   <link href="css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Template Stylesheet -->
   <link href="css/style.css" rel="stylesheet">
 
   <style>
@@ -110,51 +105,14 @@
 </head>
 <body>
   <div class="cart">
-    <h2>Shopping Cart</h2>
+    <h2>Shopping Cart <a href="products.html" style="font-size: 14px; float: right; text-decoration: none; margin-top: 5px;">Continue Shopping</a></h2>
 
-    <div class="cart-item" data-price="189">
-      <img src="img/product_1 (2).png" alt="Mouse">
-      <div class="cart-item-details">
-        <h3>Vignaharta Wall Art</h3>
-      </div>
-      <div class="quantity">
-        <button class="minus">-</button>
-        <span class="qty">2</span>
-        <button class="plus">+</button>
-      </div>
-      <div class="price">₹378</div>
-       <button class="remove" style="background:#e74c3c;color:#fff;border:none;padding:5px 8px;cursor:pointer;margin-left:10px;">Remove</button>
+    <div id="cartItemsContainer">
+        <!-- Cart Items will be injected here -->
+        <p id="emptyCartMsg" style="text-align:center; display:none;">Your cart is empty.</p>
     </div>
 
-    <div class="cart-item" data-price="209">
-      <img src="img/product_3.png" alt="Keyboard">
-      <div class="cart-item-details">
-        <h3>Buddha Meditation Canvas</h3>
-      </div>
-      <div class="quantity">
-        <button class="minus">-</button>
-        <span class="qty">1</span>
-        <button class="plus">+</button>
-      </div>
-      <div class="price">₹209</div>
-       <button class="remove" style="background:#e74c3c;color:#fff;border:none;padding:5px 8px;cursor:pointer;margin-left:10px;">Remove</button>
-    </div>
-
-    <div class="cart-item" data-price="400">
-      <img src="img/product_10.png" alt="Handfree">
-      <div class="cart-item-details">
-        <h3>Textured Basket</h3>
-      </div>
-      <div class="quantity">
-        <button class="minus">-</button>
-        <span class="qty">3</span>
-        <button class="plus">+</button>
-      </div>
-      <div class="price">₹400</div>
-       <button class="remove" style="background:#e74c3c;color:#fff;border:none;padding:5px 8px;cursor:pointer;margin-left:10px;">Remove</button>
-    </div>
-
-    <div class="summary">
+    <div class="summary" id="cartSummary">
       <div>Subtotal: <span id="subtotal">0</span></div>
       <div>Taxes (5%): <span id="tax">0</span></div>
       <div>Shipping: <span id="shipping">5.00</span></div>
@@ -163,62 +121,78 @@
     </div>
   </div>
 
+  <script src="js/cart.js"></script>
   <script>
+    const container = document.getElementById('cartItemsContainer');
+    const emptyMsg = document.getElementById('emptyCartMsg');
+    const summary = document.getElementById('cartSummary');
     const subtotalEl = document.getElementById('subtotal');
     const taxEl = document.getElementById('tax');
     const shippingEl = document.getElementById('shipping');
     const totalEl = document.getElementById('total');
 
-    // Helper to get items
-    function getCartItems() {
-        return Array.from(document.querySelectorAll('.cart-item')).map(item => {
-            return {
-                id: Math.floor(Math.random() * 100) + 1, // Dummy ID as these are hardcoded
-                name: item.querySelector('h3').innerText,
-                quantity: parseInt(item.querySelector('.qty').textContent),
-                price: parseFloat(item.dataset.price)
-            };
+    function renderCart() {
+        const cart = getCart();
+        container.innerHTML = '';
+        
+        if (cart.length === 0) {
+            container.appendChild(emptyMsg);
+            emptyMsg.style.display = 'block';
+            summary.style.display = 'none';
+            return;
+        }
+
+        emptyMsg.style.display = 'none';
+        summary.style.display = 'block';
+
+        cart.forEach(item => {
+            const totalPrice = item.quantity * item.price;
+            const itemHtml = `
+            <div class="cart-item" data-id="${item.id}" data-price="${item.price}">
+              <img src="${item.image_url}" alt="${item.name}">
+              <div class="cart-item-details">
+                <h3>${item.name}</h3>
+              </div>
+              <div class="quantity">
+                <button class="minus" onclick="changeQty(${item.id}, -1)">-</button>
+                <span class="qty">${item.quantity}</span>
+                <button class="plus" onclick="changeQty(${item.id}, 1)">+</button>
+              </div>
+              <div class="price">₹${totalPrice}</div>
+               <button class="remove" onclick="removeItem(${item.id})" style="background:#e74c3c;color:#fff;border:none;padding:5px 8px;cursor:pointer;margin-left:10px;">Remove</button>
+            </div>`;
+            container.innerHTML += itemHtml;
         });
+
+        updateSummaryDisplay(cart);
     }
 
-    const updateSummary = () => {
-      let subtotal = 0;
-      document.querySelectorAll('.cart-item').forEach(item => {
-        const qty = parseInt(item.querySelector('.qty').textContent);
-        const pricePerUnit = parseFloat(item.dataset.price);
-        const totalPrice = qty * pricePerUnit;
-        item.querySelector('.price').textContent = `₹${totalPrice}`;
-        subtotal += totalPrice;
-      });
-      subtotalEl.textContent = `₹${subtotal}`;
-      const tax = subtotal * 0.05;
-      taxEl.textContent = `₹${tax.toFixed(2)}`;
-      const shipping = 5.00;
-      shippingEl.textContent = `₹${shipping.toFixed(2)}`;
-      totalEl.textContent = `₹${(subtotal + tax + shipping).toFixed(2)}`;
-    };
+    function changeQty(id, change) {
+        updateQuantity(id, change);
+        renderCart();
+    }
 
-    // Event Delegation for dynamic items (if we were adding them dynamically)
-    document.querySelector('.cart').addEventListener('click', e => {
-        if(e.target.classList.contains('minus')) {
-            const qtyEl = e.target.nextElementSibling;
-            let qty = parseInt(qtyEl.textContent);
-            if (qty > 1) qtyEl.textContent = qty - 1;
-            updateSummary();
-        }
-        if(e.target.classList.contains('plus')) {
-            const qtyEl = e.target.previousElementSibling;
-            let qty = parseInt(qtyEl.textContent);
-            qtyEl.textContent = qty + 1;
-            updateSummary();
-        }
-        if(e.target.classList.contains('remove')) {
-            e.target.closest('.cart-item').remove();
-            updateSummary();
-        }
-    });
+    function removeItem(id) {
+        removeFromCart(id);
+        renderCart();
+    }
 
-    updateSummary();
+    function updateSummaryDisplay(cart) {
+        let subtotal = 0;
+        cart.forEach(item => {
+            subtotal += item.quantity * item.price;
+        });
+
+        subtotalEl.textContent = `₹${subtotal}`;
+        const tax = subtotal * 0.05;
+        taxEl.textContent = `₹${tax.toFixed(2)}`;
+        const shipping = 5.00;
+        shippingEl.textContent = `₹${shipping.toFixed(2)}`;
+        totalEl.textContent = `₹${(subtotal + tax + shipping).toFixed(2)}`;
+    }
+
+    // Initial Render
+    renderCart();
 
     // Checkout Logic
     document.getElementById('checkoutBtn').addEventListener('click', () => {
@@ -229,8 +203,8 @@
             return;
         }
 
-        const items = getCartItems();
-        if (items.length === 0) {
+        const cart = getCart();
+        if (cart.length === 0) {
             alert('Your cart is empty');
             return;
         }
@@ -243,7 +217,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 user_id: user.id,
-                items: items,
+                items: cart,
                 total_amount: totalAmount
             })
         })
@@ -251,14 +225,16 @@
         .then(data => {
             if(data.success) {
                 alert('Order placed successfully! Order ID: ' + data.order_id);
-                // Clear cart (visually)
-                document.querySelectorAll('.cart-item').forEach(i => i.remove());
-                updateSummary();
+                clearCart();
+                renderCart();
             } else {
                 alert('Order failed: ' + data.message);
             }
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error(err);
+            alert('Error connecting to server');
+        });
     });
   </script>
 </body>

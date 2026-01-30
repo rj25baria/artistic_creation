@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { readUsers, writeUsers } = require('../db_local');
 const bcrypt = require('bcryptjs');
 
 // Register
@@ -12,16 +12,26 @@ router.post('/register', async (req, res) => {
     }
 
     try {
+        const users = readUsers();
+        
         // Check if email exists
-        const [existingUsers] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
-        if (existingUsers.length > 0) {
-            return res.status(400).json({ success: false, message: 'Email already exists' });
+        if (users.find(u => u.email === email)) {
+             return res.status(400).json({ success: false, message: 'Email already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        await db.execute('INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)', 
-            [username, email, hashedPassword, 'buyer']);
+        const newUser = {
+            id: users.length + 1,
+            username,
+            email,
+            password: hashedPassword,
+            role: 'buyer',
+            created_at: new Date()
+        };
+        
+        users.push(newUser);
+        writeUsers(users);
             
         res.json({ success: true, message: 'Registration successful' });
     } catch (err) {
@@ -39,13 +49,13 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        const [users] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
+        const users = readUsers();
+        const user = users.find(u => u.username === username);
         
-        if (users.length === 0) {
+        if (!user) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        const user = users[0];
         const match = await bcrypt.compare(password, user.password);
 
         if (!match) {

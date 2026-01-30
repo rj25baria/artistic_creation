@@ -1,19 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { readUsers, readProducts, readOrders } = require('../db_local');
 
 router.get('/', async (req, res) => {
     try {
-        const [users] = await db.execute('SELECT COUNT(*) as count FROM users');
-        const [products] = await db.execute('SELECT COUNT(*) as count FROM products');
-        const [orders] = await db.execute('SELECT COUNT(*) as count FROM orders');
-        const [revenue] = await db.execute('SELECT SUM(total_amount) as total FROM orders');
+        const users = readUsers();
+        const products = readProducts();
+        const orders = readOrders();
+        
+        const revenue = orders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
 
         res.json({
-            users: users[0].count,
-            products: products[0].count,
-            orders: orders[0].count,
-            revenue: revenue[0].total || 0
+            users: users.length,
+            products: products.length,
+            orders: orders.length,
+            revenue: revenue
         });
     } catch (err) {
         console.error(err);

@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "user_id": 1,
+    "total_amount": 1158.95,
+    "status": "pending",
+    "created_at": "2026-01-30T15:24:24.740Z",
+    "items": [
+      {
+        "id": 7,
+        "name": "Royal Trunk Lights",
+        "price": 299,
+        "image_url": "img/product_7.png",
+        "quantity": 1
+      },
+      {
+        "id": 11,
+        "name": "Luminous Tree of Life Wall Art",
+        "price": 800,
+        "image_url": "img/product_11.png",
+        "quantity": 1
+      }
+    ]
+  }
+]

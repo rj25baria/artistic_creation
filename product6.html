@@ -116,7 +116,7 @@
         <div class="rating-msg">Click a star to rate</div>
 
         <p><strong>Free Delivery</strong></p>
-        <button class="cart" onclick="addToCart()">Add to Cart</button>
+        <button class="cart" onclick="addThisProduct()">Add to Cart</button>
         <button class="wishlist" onclick="addToWishlist()">♡ Wishlist</button>
         <button class="buy">Buy Now</button>
         <div id="feedback" class="msg"></div>
@@ -153,6 +153,7 @@
     </div>
   </div>
 
+  <script src="js/cart.js"></script>
   <script>
     const stars = document.querySelectorAll('.stars span');
     const ratingMsg = document.querySelector('.rating-msg');
@@ -168,12 +169,21 @@
       });
     });
 
-    function addToCart() {
-      const msg = document.getElementById('feedback');
-      msg.style.display = 'block';
-      msg.innerText = "✅ Added to Cart";
-      setTimeout(() => msg.style.display = 'none', 2000);
+    const currentProduct = {
+      id: 6,
+      name: 'Lord Shiva Meditation Canvas',
+      price: 199,
+      image_url: 'img/product_6.png'
+    };
+
+    function addThisProduct() {
+      window.addToCart(currentProduct);
     }
+
+    document.querySelector('.buy').addEventListener('click', () => {
+      window.addToCart(currentProduct);
+      window.location.href = 'cart.html';
+    });
 
     function addToWishlist() {
       const msg = document.getElementById('feedback');
